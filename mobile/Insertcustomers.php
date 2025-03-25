@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare($query);
 
     // Bind parameters to the query
-    $stmt->bind_param("ssssssssssss", $idNumber, $name, $citizenType, $city, $normalizedFood, $date, $time, 
+    $stmt->bind_param("sssssssssssss", $idNumber, $name, $citizenType, $city, $normalizedFood, $date, $time, 
     $cashierName, $branch, $discountPercentage, $original_price, $total_price, $control_no);
 
     // Execute the query and check if it was successful
