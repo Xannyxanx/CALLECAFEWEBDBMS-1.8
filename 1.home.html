@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calle Cafe - Dashboard</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="icon" href="images/browserlogo.png" type="browser logo">
+</head>
+
+<body>
+    <div>
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <h2>Calle Cafe</h2>
+            <ul>
+                <li><a href="1.home.html">HOME</a></li>
+                <li><a href="2.discounted_customers.html">DISCOUNTED CUSTOMERS</a></li>
+                <li><a href="3.archive.html">ARCHIVE</a></li>
+                <li><a href="#" id="accountManagementLink">ACCOUNT MANAGEMENT</a></li>
+                <li><a href="#" id="userAccountSettingsLink">USER ACCOUNT SETTINGS</a></li>
+                <li><a id="logoutButton" href="#">LOGOUT</a></li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content" style="width: 80%; padding: 15px;">
+            <h2>Dashboard</h2>
+
+            <!-- GRAPHS AND CHARTS -->
+            <div>
+                <h3></h3>
+                <div class="live-counters" style="padding-bottom: 50px;">
+                    <div class="counter-box">
+                        <h3>Total Discounted Customers</h3>
+                        <p id="totalCustomers">0</p>
+                    </div>
+                    <div class="counter-box">
+                        <h3>Senior Citizen</h3>
+                        <p id="totalSenior">0</p>
+                    </div>
+                    <div class="counter-box">
+                        <h3>PWD</h3>
+                        <p id="totalPWD">0</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3></h3>
+                <div class="charts-container">
+                    <!-- Pie Chart -->
+                    <div class="chart-box">
+                        <canvas id="myPieChart"></canvas>
+                        <div class="dropdown">
+                            <select id="pieChartPeriod">
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                                <option value="year">Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bar Chart -->
+                    <div class="chart-box">
+
+                        <canvas id="myBarChart"></canvas>
+                        <div class="dropdown">
+                            <select id="barChartPeriod">
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                                <option value="year">Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+            <div>
+                <h3>Recent Customers (last 24 hours)</h3>
+                <table>
+                    <tr>
+                    <tr>
+
+                        <th class="default-column" style="width: 12.5%;">ID NUMBER</th>
+                        <th class="default-column" style="width: 12.5%;">NAME</th>
+                        <th class="optional-column" style="width: 8%;">CITIZEN</th>
+                        <th class="default-column" style="width: 12%;">CITY</th>
+                        <th class="default-column" style="width: 10%;">FOOD</th>
+                        <th class="optional-column" style="width: 6%;">DATE</th>
+                        <th class="optional-column" style="width: 6%;">TIME</th>
+                        <th class="optional-column" style="width: 10%;">CASHIER</th>
+                        <th class="default-column" style="width: 7.5%;">BRANCH</th>
+                        <th class="optional-column" style="width: 5%;">DISC%</th>
+                        <th class="optional-column" style="width: 5%;">PRICE</th>
+                        <th class="optional-column" style="width: 5%;">TOTAL</th>
+                        <th class="optional-column" style="width: 12.5%;">CONTROL #</th>
+                    </tr>
+
+                    </tr>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+            <!-- PAGINATION -->
+            <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <button id="toggleColumnsBtn" class="toggle-columns-btn">Show All</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter Password</h2>
+            <input class="modal-password-input" type="password" id="passwordInput" placeholder="Enter your password">
+            <button class="modal-password-btn" id="passwordSubmit">Submit</button>
+        </div>
+    </div>
+
+    <div class="modal"> <!-- LOGOUT MODAL -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Are you sure?</h2>
+            <button>Yes</button>
+            <button>No</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let pieChart, barChart;
+            const toggleColumnsBtn = document.getElementById("toggleColumnsBtn");
+            const optionalColumns = document.querySelectorAll('.optional-column');
+            // Function to create the Pie Chart
+
+            function initializeTableColumns() {
+                optionalColumns.forEach(col => {
+                    col.style.display = 'none';
+                });
+                toggleColumnsBtn.textContent = 'Show All';
+            }
+
+            // Toggle column visibility
+            function toggleColumns() {
+                const showAll = toggleColumnsBtn.textContent === 'Show All';
+
+                if (showAll) {
+                    optionalColumns.forEach(col => {
+                        col.style.display = '';
+                    });
+                    toggleColumnsBtn.textContent = 'Show Less';
+                } else {
+                    optionalColumns.forEach(col => {
+                        col.style.display = 'none';
+                    });
+                    toggleColumnsBtn.textContent = 'Show All';
+                }
+
+                // Update existing rows
+                const optionalCells = document.querySelectorAll('#tableBody tr td.optional-column');
+                optionalCells.forEach(cell => {
+                    cell.style.display = showAll ? '' : 'none';
+                });
+            }
+
+            // Initialize the table columns on load
+            initializeTableColumns();
+
+            // Add event listener for the toggle button
+            toggleColumnsBtn.addEventListener('click', toggleColumns);
+
+
+            function createPieChart(data) {
+                const ctx = document.getElementById('myPieChart').getContext('2d');
+                if (pieChart) pieChart.destroy(); // Destroy existing chart if it exists
+                pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Drinks', 'Pastry', 'Pasta'],
+                        datasets: [{
+                            label: 'Food Categories',
+                            data: data,
+                            backgroundColor: ['#6F814B', '#805736', '#B28330'],
+                            borderColor: ['#4E6136', '#5C3F27', '#8A6928'],
+                            hoverOffset: 4,
+                            borderWidth: 0.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Function to create the Bar Chart
+            function createBarChart(data) {
+                const ctx = document.getElementById('myBarChart').getContext('2d');
+                if (barChart) barChart.destroy(); // Destroy existing chart if it exists
+                barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Senior Citizens', 'PWD', 'Others', 'Total'],
+                        datasets: [{
+                            label: 'Count',
+                            data: data,
+                            backgroundColor: ['#6F814B', '#805736', '#B28330', '#C77932'],
+                            borderColor: ['#4E6136', '#5C3F27', '#8A6928', '#9E5F26'],
+                            borderWidth: 0.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function to fetch data based on the selected period
+            function fetchChartData(period, chartType) {
+                fetch(`fetch_chart_data.php?period=${period}&chartType=${chartType}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (chartType === 'pie') {
+                            createPieChart(data);
+                        } else if (chartType === 'bar') {
+                            createBarChart(data);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching chart data:', error));
+            }
+
+            // Event listeners for period selection
+            document.getElementById('pieChartPeriod').addEventListener('change', function () {
+                const period = this.value;
+                fetchChartData(period, 'pie');
+            });
+
+            document.getElementById('barChartPeriod').addEventListener('change', function () {
+                const period = this.value;
+                fetchChartData(period, 'bar');
+            });
+
+            // Initialize charts with default data (Week) on page load
+            fetchChartData('week', 'pie');
+            fetchChartData('week', 'bar');
+
+            // Fetch and display recent customers
+            fetch("1.recent_customers.php")
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("tableBody");
+                    let totalCustomers = document.getElementById("totalCustomers");
+                    let totalSenior = document.getElementById("totalSenior");
+                    let totalPWD = document.getElementById("totalPWD");
+
+                    tableBody.innerHTML = "";
+
+                    let rows = "";
+                    data.customers.forEach(customer => {
+                        rows += `
+                        <tr>
+                            <td class="default-column">${customer.ID}</td>
+                            <td class="default-column">${customer.name}</td>
+                            <td class="optional-column">${customer.citizen}</td>
+                            <td class="default-column">${customer.city}</td>
+                            <td class="default-column">${customer.food}</td>
+                            <td class="optional-column">${customer.date}</td>
+                            <td class="optional-column">${customer.time}</td>
+                            <td class="optional-column">${customer.cashier}</td>
+                            <td class="default-column">${customer.branch}</td>
+                            <td class="optional-column">${customer.discount_percentage}</td>
+                            <td class="optional-column">${customer.price}</td>
+                            <td class="optional-column">${customer.discounted_price}</td>
+                            <td class="optional-column">${customer.control_number}</td>
+                        </tr>
+                    `;
+                    });
+
+                    tableBody.innerHTML = rows;
+                    const optionalCells = document.querySelectorAll('#tableBody tr td.optional-column');
+                    optionalCells.forEach(cell => {
+                        cell.style.display = toggleColumnsBtn.textContent === 'Show All' ? 'none' : '';
+                    });
+
+                    totalCustomers.textContent = data.totalDiscounted;
+                    totalSenior.textContent = data.totalSenior;
+                    totalPWD.textContent = data.totalPWD;
+
+                    totalCustomers.textContent = data.totalDiscounted;
+                    totalSenior.textContent = data.totalSenior;
+                    totalPWD.textContent = data.totalPWD;
+
+
+                })
+                .catch(error => console.error("Error fetching customer data:", error));
+        });
+
+        function showImageModal(imageData) {
+            const modal = document.getElementById("imageModal");
+            const modalImage = document.getElementById("modalImage");
+            const closeBtn = document.querySelector("#imageModal .close");
+
+            modalImage.src = `data:image/jpeg;base64,${imageData}`;
+            modal.style.display = "block";
+
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+
+        document.getElementById("logoutButton").addEventListener("click", function () {
+            window.location.href = "logout.php";
+        });
+
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+
+        document.getElementById("accountManagementLink").addEventListener("click", function (event) {
+            event.preventDefault();
+            showPasswordModal("4.1account_management.html");
+        });
+
+        document.getElementById("userAccountSettingsLink").addEventListener("click", function (event) {
+            event.preventDefault();
+            showPasswordModal("5.account_settings.html");
+        });
+
+        function showPasswordModal(redirectUrl) {
+            const modal = document.getElementById("passwordModal");
+            const closeBtn = document.querySelector(".close");
+            const submitBtn = document.getElementById("passwordSubmit");
+
+            modal.style.display = "block";
+
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            submitBtn.onclick = function () {
+                const password = document.getElementById("passwordInput").value;
+                if (password) {
+                    fetch("verify_password.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: "password=" + encodeURIComponent(password)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                alert("Incorrect password. Please try again.");
+                            }
+                        })
+                        .catch(error => console.error("Error verifying password:", error));
+                }
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

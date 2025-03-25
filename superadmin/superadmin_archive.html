@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calle Cafe - Super Admin Archives</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="icon" href="admin_images/browserlogo.png" type="browser logo">
+
+</head>
+
+<body>
+    <div>
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <h2>Calle Cafe <small> (superadmin)</small></h2>
+            <ul>
+                <li><a href="superadmin_home.html">HOME</a></li>
+                <li><a href="superadmin_discountedCustomers.html">DISCOUNTED CUSTOMERS</a></li>
+                <li><a href="superadmin_archive.html">ARCHIVE</a></li>
+                <li><a href="#" id="accountManagementLink">ACCOUNT MANAGEMENT</a></li>
+                <li><a href="#" id="userAccountSettingsLink">SUPER ADMIN SETTINGS</a></li>
+                <li><a href="#" id="branchManagementLink">BRANCH MANAGEMENT</a></li>
+                <li><a id="logoutButton">LOGOUT</a></li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content" style="width: 80%; padding: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Archives</h2>
+                <button id="toggleColumnsBtn" style="margin-bottom: 10px;">Show All</button>
+            </div>
+            <!-- FILTER FORM -->
+            <form class="archive-form" action="#" method="get" style="margin-right: 5%;"> <!-- Database -->
+                <div class="dropdown">
+                    <label for="branchSelect"
+                        style="font-size: 14px; margin-right: 5px;"><strong>Branch:</strong></label>
+                    <select id="branchSelect">
+                        <option value="all">All</option>
+                    </select>
+                </div>
+
+                <label for="fromDate" style="padding-right: 5px; padding-left: 30px;"><strong>From</strong></label>
+                <input type="date" id="fromDate" name="fromDate" class="date-input">
+                <label for="toDate" style="padding-left: 5px; padding-right: 5px;"><strong>To</strong></label>
+                <input type="date" id="toDate" name="toDate" class="date-input">
+                <input type="search" id="search" name="query" placeholder="Search..." required>
+            </form>
+
+            <!-- TABLE -->
+            <div>
+                <h3>Archived Records</h3>
+                <table border="0.5" width="100%" id="archiveTable">
+                    <thead>
+                        <tr>
+                            <th class="default-column" style="width: 12.5%;">ID NUMBER</th>
+                            <th class="default-column" style="width: 12.5%;">NAME</th>
+                            <th class="optional-column" style="width: 8%;">CITIZEN</th>
+                            <th class="default-column" style="width: 12%;">CITY</th>
+                            <th class="default-column" style="width: 10%;">FOOD</th>
+                            <th class="optional-column" style="width: 6%;">DATE</th>
+                            <th class="optional-column" style="width: 6%;">TIME</th>
+                            <th class="optional-column" style="width: 10%;">CASHIER</th>
+                            <th class="default-column" style="width: 7.5%;">BRANCH</th>
+                            <th class="optional-column" style="width: 5%;">DISC%</th>
+                            <th class="optional-column" style="width: 5%;">PRICE</th>
+                            <th class="optional-column" style="width: 5%;">TOTAL</th>
+                            <th class="optional-column" style="width: 12.5%;">CONTROL #</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div id="paginationControls" class="pagination-controls"
+                style="display: flex; justify-content: center; margin-top: 20px; margin-left: 60px;">
+                <button class="pagination-controls-button" id="prevPage" disabled>Previous</button>
+                <span id="pageInfo"></span>
+                <button class="pagination-controls-button" id="nextPage">Next</button>
+                <button id="toggleColumnsBtn" class="toggle-columns-btn">Show All</button>
+            </div>
+            <!-- EXCEL BUTTON -->
+            <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <a href="#" id="exportPdfBtn" class="download-btn" style="display: flex; align-items: center;">
+                    <img src="admin_images/pdf.png" alt="excelIcon" class="icon" style="margin-right: 5px;" />
+                    Download PDF
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter Password</h2>
+            <input class="modal-password-input" type="password" id="passwordInput" placeholder="Enter your password">
+            <button class="modal-password-btn" id="passwordSubmit">Submit</button>
+        </div>
+    </div>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tableBody = document.getElementById("archiveTableBody");
+            const fromDateInput = document.getElementById("fromDate");
+            const toDateInput = document.getElementById("toDate");
+            const searchInput = document.getElementById("search");
+            const branchSelect = document.getElementById("branchSelect");
+            const paginationControls = document.getElementById("paginationControls");
+            const prevPageButton = document.getElementById("prevPage");
+            const nextPageButton = document.getElementById("nextPage");
+            const pageInfo = document.getElementById("pageInfo");
+            const toggleColumnsBtn = document.getElementById("toggleColumnsBtn");
+            const optionalColumns = document.querySelectorAll('.optional-column');
+            const table = document.getElementById('archiveTable');
+
+            let currentPage = 1;
+            let showAllColumns = false;
+            let showAllRecords = false;
+            let allRecords = [];
+
+            // Initialize table to show less columns
+            function initializeTableColumns() {
+                optionalColumns.forEach(col => {
+                    col.style.display = 'none';
+                });
+                toggleColumnsBtn.textContent = 'Show All';
+                showAllColumns = false;
+                showAllRecords = false;
+                paginationControls.style.display = 'block';
+            }
+
+            // Toggle column visibility and records display
+            function toggleColumns() {
+                showAllColumns = !showAllColumns;
+
+                if (showAllColumns) {
+                    optionalColumns.forEach(col => {
+                        col.style.display = '';
+                    });
+                    toggleColumnsBtn.textContent = 'Show Less';
+                } else {
+                    optionalColumns.forEach(col => {
+                        col.style.display = 'none';
+                    });
+                    toggleColumnsBtn.textContent = 'Show All';
+                }
+
+                // Update column visibility for existing rows
+                const optionalCells = document.querySelectorAll('#archiveTableBody tr td.optional-column');
+                optionalCells.forEach(cell => {
+                    cell.style.display = showAllColumns ? '' : 'none';
+                });
+            }
+
+
+            // Fetch all records without pagination
+            function fetchAllRecords() {
+                const fromDate = fromDateInput.value.trim();
+                const toDate = toDateInput.value.trim();
+                const query = searchInput.value.trim().toLowerCase();
+                const branch = branchSelect.value;
+
+                let url = `superadmin_displayArchive.php?fromDate=${fromDate}&toDate=${toDate}&branch=${branch}&query=${query}&allRecords=true`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.records) {
+                            allRecords = data.records;
+                            populateTable(allRecords);
+                        } else {
+                            tableBody.innerHTML = "<tr><td colspan='12'>No records found.</td></tr>";
+                        }
+                    })
+                    .catch(error => console.error("Error fetching all records:", error));
+            }
+
+            // Set the date inputs to the current date
+            const today = new Date().toISOString().split("T")[0];
+            fromDateInput.value = today;
+            toDateInput.value = today;
+
+            // Fetch branches and populate the dropdown
+            function fetchBranches() {
+                fetch("superadmin_displayArchive.php?fetchBranches=true")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.branches) {
+                            populateBranchDropdown(data.branches);
+                        }
+                    })
+                    .catch(error => console.error("Error fetching branches:", error));
+            }
+
+            function populateBranchDropdown(branches) {
+                branchSelect.innerHTML = `<option value="all">All</option>`;
+                branches.forEach(branch => {
+                    const option = document.createElement("option");
+                    option.value = branch.toLowerCase();
+                    option.textContent = branch;
+                    branchSelect.appendChild(option);
+                });
+            }
+
+            function fetchData(page = 1) {
+                const fromDate = fromDateInput.value.trim();
+                const toDate = toDateInput.value.trim();
+                const query = searchInput.value.trim().toLowerCase();
+                const branch = branchSelect.value;
+
+                let url = `superadmin_displayArchive.php?fromDate=${fromDate}&toDate=${toDate}&branch=${branch}&query=${query}&page=${page}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.records) {
+                            allRecords = data.records;
+                            populateTable(data.records);
+                            setupPagination(data.totalPages, data.currentPage);
+                        } else {
+                            tableBody.innerHTML = "<tr><td colspan='12'>No records found.</td></tr>";
+                            paginationControls.style.display = "none";
+                        }
+                    })
+                    .catch(error => console.error("Error fetching data:", error));
+            }
+
+            function populateTable(records) {
+                tableBody.innerHTML = "";
+
+                if (records.length > 0) {
+                    records.forEach(record => {
+                        let row = `
+                            <tr>
+                                <td class="default-column">${record.ID}</td>
+                                <td class="default-column">${record.name}</td>
+                                <td class="optional-column">${record.citizen}</td>
+                                <td class="default-column">${record.city}</td>
+                                <td class="default-column">${record.food}</td>
+                                <td class="optional-column">${record.date}</td>
+                                <td class="optional-column">${record.time}</td>
+                                <td class="optional-column">${record.cashier}</td>
+                                <td class="default-column">${record.branch}</td>
+                                <td class="optional-column">${record.discount_percentage}</td>
+                                <td class="optional-column">${record.price}</td>
+                                <td class="optional-column">${record.discounted_price}</td>
+                                <td class="optional-column">${record.control_number}</td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+
+                    // Apply column visibility to each row
+                    const optionalCells = document.querySelectorAll('#archiveTableBody tr td.optional-column');
+                    optionalCells.forEach(cell => {
+                        cell.style.display = showAllColumns ? '' : 'none';
+                    });
+                } else {
+                    tableBody.innerHTML = "<tr><td colspan='13'>No records found.</td></tr>";
+                }
+            }
+
+            function setupPagination(totalPages, currentPage) {
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                prevPageButton.disabled = currentPage === 1 || totalPages === 0;
+                nextPageButton.disabled = currentPage === totalPages || totalPages === 0;
+
+                prevPageButton.onclick = () => {
+                    if (currentPage > 1) {
+                        fetchData(--currentPage);
+                    }
+                };
+
+                nextPageButton.onclick = () => {
+                    if (currentPage < totalPages) {
+                        fetchData(++currentPage);
+                    }
+                };
+
+                paginationControls.style.display = totalPages > 1 ? "block" : "none";
+            }
+
+            // Event listeners
+            fromDateInput.addEventListener("change", () => {
+                if (showAllRecords) {
+                    fetchAllRecords();
+                } else {
+                    fetchData(1);
+                }
+            });
+            toDateInput.addEventListener("change", () => {
+                if (showAllRecords) {
+                    fetchAllRecords();
+                } else {
+                    fetchData(1);
+                }
+            });
+            searchInput.addEventListener("input", () => {
+                if (showAllRecords) {
+                    fetchAllRecords();
+                } else {
+                    fetchData(1);
+                }
+            });
+            branchSelect.addEventListener("change", () => {
+                if (showAllRecords) {
+                    fetchAllRecords();
+                } else {
+                    fetchData(1);
+                }
+            });
+            toggleColumnsBtn.addEventListener("click", toggleColumns);
+
+            // Initialize
+            initializeTableColumns();
+            fetchBranches();
+            fetchData(currentPage);
+
+            function showImageModal(imageData) {
+                const modal = document.getElementById("imageModal");
+                const modalImage = document.getElementById("modalImage");
+                const closeBtn = document.querySelector("#imageModal .close");
+
+                modalImage.src = `data:image/jpeg;base64,${imageData}`;
+                modal.style.display = "block";
+
+                closeBtn.onclick = function () {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            }
+
+            document.getElementById("exportPdfBtn").addEventListener("click", function () {
+                const fromDate = document.getElementById("fromDate").value.trim(); // Get the "from" date
+                const toDate = document.getElementById("toDate").value.trim(); // Get the "to" date
+                const branch = document.getElementById("branchSelect").value; // Get the selected branch
+                const query = document.getElementById("search").value.trim(); // Get the search query (optional)
+
+                // Validate that both dates are provided
+                if (!fromDate || !toDate) {
+                    alert("Please select both 'From' and 'To' dates.");
+                    return;
+                }
+
+                // Construct the URL with the selected branch, dates, and query
+                let url = `3.DownloadPDF.php?fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&branch=${encodeURIComponent(branch)}&query=${encodeURIComponent(query)}`;
+                window.location.href = url; // Redirect to the download URL
+            });
+
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = function () {
+                window.history.pushState(null, "", window.location.href);
+            };
+
+            document.getElementById("logoutButton").addEventListener("click", function () {
+                window.location.href = "logout.php";
+            });
+
+            document.getElementById("accountManagementLink").addEventListener("click", function (event) {
+                event.preventDefault();
+                showPasswordModal("superadmin_accountManagement.html");
+            });
+
+            document.getElementById("userAccountSettingsLink").addEventListener("click", function (event) {
+                event.preventDefault();
+                showPasswordModal("superadmin_accountSettings.html");
+
+            });
+
+            document.getElementById("branchManagementLink").addEventListener("click", function (event) {
+                event.preventDefault();
+                showPasswordModal("superadmin_branchmgmt.html");
+            });
+
+            function showPasswordModal(redirectUrl) {
+                const modal = document.getElementById("passwordModal");
+                const closeBtn = document.querySelector(".close");
+                const submitBtn = document.getElementById("passwordSubmit");
+
+                modal.style.display = "block";
+
+                closeBtn.onclick = function () {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                submitBtn.onclick = function () {
+                    const password = document.getElementById("passwordInput").value;
+                    if (password) {
+                        fetch("verify_password.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: "password=" + encodeURIComponent(password)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.location.href = redirectUrl;
+                                } else {
+                                    alert("Incorrect password. Please try again.");
+                                }
+                            })
+                            .catch(error => console.error("Error verifying password:", error));
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
