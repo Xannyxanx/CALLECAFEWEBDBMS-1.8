@@ -98,15 +98,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Insert the new record
     $query = "INSERT INTO dapitancustomers (
-        ID, name, citizen, food, date, time, 
+        ID, name, citizen, city, food, date, time, 
         cashier, branch, discount_percentage, price,
         discounted_price, control_number
     ) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
 
     // Bind parameters to the query
-    $stmt->bind_param("ssssssssssss", $idNumber, $name, $citizenType, $normalizedFood, $date, $time, 
+    $stmt->bind_param("ssssssssssss", $idNumber, $name, $citizenType, $city, $normalizedFood, $date, $time, 
     $cashierName, $branch, $discountPercentage, $original_price, $total_price, $control_no);
 
     // Execute the query and check if it was successful
