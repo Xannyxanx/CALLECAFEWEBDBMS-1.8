@@ -40,19 +40,14 @@
                 <h3>Archived Records</h3>
                 <table border="0.5" width="100%">
                     <tr>
-                        <th class="default-column" style="width: 12.5%;">ID NUMBER</th>
-                        <th class="default-column" style="width: 12.5%;">NAME</th>
-                        <th class="optional-column" style="width: 8%;">CITIZEN</th>
-                        <th class="default-column" style="width: 12%;">CITY</th>
-                        <th class="default-column" style="width: 10%;">FOOD</th>
-                        <th class="optional-column" style="width: 6%;">DATE</th>
-                        <th class="optional-column" style="width: 6%;">TIME</th>
-                        <th class="optional-column" style="width: 10%;">CASHIER</th>
-                        <th class="default-column" style="width: 7.5%;">BRANCH</th>
-                        <th class="optional-column" style="width: 5%;">DISC%</th>
-                        <th class="optional-column" style="width: 5%;">PRICE</th>
-                        <th class="optional-column" style="width: 5%;">TOTAL</th>
-                        <th class="optional-column" style="width: 12.5%;">CONTROL #</th>
+                        <th style="width: 12.5%;">ID NUMBER</th>
+                        <th style="width: 12.5%;">NAME</th>
+                        <th style="width: 8%;">CITIZEN</th>
+                        <th style="width: 10%;">FOOD</th>
+                        <th style="width: 8%;">DATE</th>
+                        <th style="width: 6%;">TIME</th>
+                        <th style="width: 10%;">CASHIER</th>
+                        <th style="width: 5%;">TOTAL</th>
                     </tr>
                     <tbody id="archiveTableBody">
                     </tbody>
@@ -64,9 +59,6 @@
                 <button class="pagination-controls-button" id="prevPage" disabled>Previous</button>
                 <span id="pageInfo"></span>
                 <button class="pagination-controls-button" id="nextPage">Next</button>
-                <div>
-                    <button id="toggleColumnsBtn" class="toggle-columns-btn">Show All</button>
-                </div>
             </div>
             <!-- PDF DL -->
             <div style="display: flex; justify-content: center; margin-top: 20px;">
@@ -107,48 +99,9 @@
                 const prevPageButton = document.getElementById("prevPage");
                 const nextPageButton = document.getElementById("nextPage");
                 const pageInfo = document.getElementById("pageInfo");
-                const toggleColumnsBtn = document.getElementById("toggleColumnsBtn");
-                const optionalColumns = document.querySelectorAll('.optional-column');
-                const defaultColumns = document.querySelectorAll('.default-column');
 
                 let currentPage = 1;
 
-                // Initialize table to show less columns by default
-                function initializeTableColumns() {
-                    optionalColumns.forEach(col => {
-                        col.style.display = 'none';
-                    });
-                    toggleColumnsBtn.textContent = 'Show All';
-                }
-
-                // Toggle column visibility
-                function toggleColumns() {
-                    const showAll = toggleColumnsBtn.textContent === 'Show All';
-
-                    if (showAll) {
-                        optionalColumns.forEach(col => {
-                            col.style.display = '';
-                        });
-                        toggleColumnsBtn.textContent = 'Show Less';
-                    } else {
-                        optionalColumns.forEach(col => {
-                            col.style.display = 'none';
-                        });
-                        toggleColumnsBtn.textContent = 'Show All';
-                    }
-
-                    // Update existing rows
-                    const optionalCells = document.querySelectorAll('#archiveTableBody tr td.optional-column');
-                    optionalCells.forEach(cell => {
-                        cell.style.display = showAll ? '' : 'none';
-                    });
-                }
-
-                // Initialize the table columns on load
-                initializeTableColumns();
-
-                // Add event listener for the toggle button
-                toggleColumnsBtn.addEventListener('click', toggleColumns);
 
                 // Set the date inputs to the current date
                 const today = new Date().toISOString().split("T")[0];
@@ -183,19 +136,14 @@
                         records.forEach(record => {
                             let row = `
                         <tr>
-                            <td class="default-column">${record.ID}</td>
-                            <td class="default-column">${record.name}</td>
-                            <td class="optional-column">${record.citizen}</td>
-                            <td class="default-column">${record.city}</td>
-                            <td class="default-column">${record.food}</td>
-                            <td class="optional-column">${record.date}</td>
-                            <td class="optional-column">${record.time}</td>
-                            <td class="optional-column">${record.cashier}</td>
-                            <td class="default-column">${record.branch}</td>
-                            <td class="optional-column">${record.discount_percentage}</td>
-                            <td class="optional-column">${record.price}</td>
-                            <td class="optional-column">${record.discounted_price}</td>
-                            <td class="optional-column">${record.control_number}</td>
+                                <td>${record.ID}</td>
+                                <td>${record.name}</td>
+                                <td>${record.citizen}</td>
+                                <td>${record.food}</td>
+                                <td>${record.date}</td>
+                                <td>${record.time}</td>
+                                <td>${record.cashier}</td>
+                                <td>${record.discounted_price}</td>
                         </tr>
                     `;
                             tableBody.innerHTML += row;

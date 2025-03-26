@@ -85,20 +85,14 @@
                 <table>
                     <tr>
                     <tr>
-
-                        <th class="default-column" style="width: 12.5%;">ID NUMBER</th>
-                        <th class="default-column" style="width: 12.5%;">NAME</th>
-                        <th class="optional-column" style="width: 8%;">CITIZEN</th>
-                        <th class="default-column" style="width: 12%;">CITY</th>
-                        <th class="default-column" style="width: 10%;">FOOD</th>
-                        <th class="optional-column" style="width: 6%;">DATE</th>
-                        <th class="optional-column" style="width: 6%;">TIME</th>
-                        <th class="optional-column" style="width: 10%;">CASHIER</th>
-                        <th class="default-column" style="width: 7.5%;">BRANCH</th>
-                        <th class="optional-column" style="width: 5%;">DISC%</th>
-                        <th class="optional-column" style="width: 5%;">PRICE</th>
-                        <th class="optional-column" style="width: 5%;">TOTAL</th>
-                        <th class="optional-column" style="width: 12.5%;">CONTROL #</th>
+                        <th style="width: 12.5%;">ID NUMBER</th>
+                        <th style="width: 12.5%;">NAME</th>
+                        <th style="width: 8%;">CITIZEN</th>
+                        <th style="width: 10%;">FOOD</th>
+                        <th style="width: 8%;">DATE</th>
+                        <th style="width: 6%;">TIME</th>
+                        <th style="width: 10%;">CASHIER</th>
+                        <th style="width: 5%;">TOTAL</th>
                     </tr>
 
                     </tr>
@@ -107,9 +101,6 @@
                 </table>
             </div>
             <!-- PAGINATION -->
-            <div style="display: flex; justify-content: center; margin-top: 20px;">
-                <button id="toggleColumnsBtn" class="toggle-columns-btn">Show All</button>
-            </div>
         </main>
     </div>
 
@@ -134,45 +125,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             let pieChart, barChart;
-            const toggleColumnsBtn = document.getElementById("toggleColumnsBtn");
-            const optionalColumns = document.querySelectorAll('.optional-column');
             // Function to create the Pie Chart
 
-            function initializeTableColumns() {
-                optionalColumns.forEach(col => {
-                    col.style.display = 'none';
-                });
-                toggleColumnsBtn.textContent = 'Show All';
-            }
-
-            // Toggle column visibility
-            function toggleColumns() {
-                const showAll = toggleColumnsBtn.textContent === 'Show All';
-
-                if (showAll) {
-                    optionalColumns.forEach(col => {
-                        col.style.display = '';
-                    });
-                    toggleColumnsBtn.textContent = 'Show Less';
-                } else {
-                    optionalColumns.forEach(col => {
-                        col.style.display = 'none';
-                    });
-                    toggleColumnsBtn.textContent = 'Show All';
-                }
-
-                // Update existing rows
-                const optionalCells = document.querySelectorAll('#tableBody tr td.optional-column');
-                optionalCells.forEach(cell => {
-                    cell.style.display = showAll ? '' : 'none';
-                });
-            }
-
-            // Initialize the table columns on load
-            initializeTableColumns();
-
-            // Add event listener for the toggle button
-            toggleColumnsBtn.addEventListener('click', toggleColumns);
 
 
             function createPieChart(data) {
@@ -270,28 +224,19 @@
                     data.customers.forEach(customer => {
                         rows += `
                         <tr>
-                            <td class="default-column">${customer.ID}</td>
-                            <td class="default-column">${customer.name}</td>
-                            <td class="optional-column">${customer.citizen}</td>
-                            <td class="default-column">${customer.city}</td>
-                            <td class="default-column">${customer.food}</td>
-                            <td class="optional-column">${customer.date}</td>
-                            <td class="optional-column">${customer.time}</td>
-                            <td class="optional-column">${customer.cashier}</td>
-                            <td class="default-column">${customer.branch}</td>
-                            <td class="optional-column">${customer.discount_percentage}</td>
-                            <td class="optional-column">${customer.price}</td>
-                            <td class="optional-column">${customer.discounted_price}</td>
-                            <td class="optional-column">${customer.control_number}</td>
+                        <td>${customer.ID}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.citizen}</td>
+                        <td>${customer.food}</td>
+                        <td>${customer.date}</td>
+                        <td>${customer.time}</td>
+                        <td>${customer.cashier}</td>
+                        <td>${customer.discounted_price}</td>
                         </tr>
                     `;
                     });
 
                     tableBody.innerHTML = rows;
-                    const optionalCells = document.querySelectorAll('#tableBody tr td.optional-column');
-                    optionalCells.forEach(cell => {
-                        cell.style.display = toggleColumnsBtn.textContent === 'Show All' ? 'none' : '';
-                    });
 
                     totalCustomers.textContent = data.totalDiscounted;
                     totalSenior.textContent = data.totalSenior;

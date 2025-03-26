@@ -36,19 +36,14 @@
                 <table border="0.5" width="100%">
                     <thead>
                         <tr>
-                            <th class="default-column" style="width: 12.5%;">ID NUMBER</th>
-                            <th class="default-column" style="width: 12.5%;">NAME</th>
-                            <th class="optional-column" style="width: 8%;">CITIZEN</th>
-                            <th class="default-column" style="width: 12%;">CITY</th>
-                            <th class="default-column" style="width: 10%;">FOOD</th>
-                            <th class="optional-column" style="width: 6%;">DATE</th>
-                            <th class="optional-column" style="width: 6%;">TIME</th>
-                            <th class="optional-column" style="width: 10%;">CASHIER</th>
-                            <th class="default-column" style="width: 7.5%;">BRANCH</th>
-                            <th class="optional-column" style="width: 5%;">DISC%</th>
-                            <th class="optional-column" style="width: 5%;">PRICE</th>
-                            <th class="optional-column" style="width: 5%;">TOTAL</th>
-                            <th class="optional-column" style="width: 12.5%;">CONTROL #</th>
+                            <th style="width: 12.5%;">ID NUMBER</th>
+                            <th style="width: 12.5%;">NAME</th>
+                            <th style="width: 8%;">CITIZEN</th>
+                            <th style="width: 10%;">FOOD</th>
+                            <th style="width: 8%;">DATE</th>
+                            <th style="width: 6%;">TIME</th>
+                            <th style="width: 10%;">CASHIER</th>
+                            <th style="width: 5%;">TOTAL</th>
                         </tr>
                     </thead>
                     <tbody id="customerTableBody">
@@ -62,7 +57,6 @@
                 <button class="pagination-controls-button" id="prevPage" disabled>Previous</button>
                 <span id="pageInfo"></span>
                 <button class="pagination-controls-button" id="nextPage">Next</button>
-                <button id="toggleColumnsBtn" class="toggle-columns-btn">Show All</button>
             </div>
             <!-- Archive Button -->
             <div style="display: flex; justify-content: center; margin-top: 20px;">
@@ -99,40 +93,8 @@
             const prevPageButton = document.getElementById("prevPage");
             const nextPageButton = document.getElementById("nextPage");
             const pageInfo = document.getElementById("pageInfo");
-            const toggleColumnsBtn = document.getElementById("toggleColumnsBtn");
-            const optionalColumns = document.querySelectorAll('.optional-column');
 
             let currentPage = 1;
-            function initializeTableColumns() {
-                // Hide optional columns in header
-                document.querySelectorAll('thead .optional-column').forEach(col => {
-                    col.style.display = 'none';
-                });
-                // Hide optional columns in body
-                document.querySelectorAll('#customerTableBody tr td.optional-column').forEach(cell => {
-                    cell.style.display = 'none';
-                });
-                toggleColumnsBtn.textContent = 'Show All';
-            }
-            function toggleColumns() {
-                const showAll = toggleColumnsBtn.textContent === 'Show All';
-
-                // Toggle header columns
-                document.querySelectorAll('thead .optional-column').forEach(col => {
-                    col.style.display = showAll ? '' : 'none';
-                });
-
-                // Toggle body columns
-                document.querySelectorAll('#customerTableBody tr td.optional-column').forEach(cell => {
-                    cell.style.display = showAll ? '' : 'none';
-                });
-
-                toggleColumnsBtn.textContent = showAll ? 'Show Less' : 'Show All';
-            }
-
-
-            initializeTableColumns();
-            toggleColumnsBtn.addEventListener('click', toggleColumns);
 
             function fetchData(page = 1) {
                 let url = `displayCustomers.php?page=${page}`;
@@ -158,29 +120,20 @@
                     customers.forEach(customer => {
                         let row = `
                             <tr>
-                                <td class="default-column">${customer.ID}</td>
-                                <td class="default-column">${customer.name}</td>
-                                <td class="optional-column">${customer.citizen}</td>
-                                <td class="default-column">${customer.city}</td>
-                                <td class="default-column">${customer.food}</td>
-                                <td class="optional-column">${customer.date}</td>
-                                <td class="optional-column">${customer.time}</td>
-                                <td class="optional-column">${customer.cashier}</td>
-                                <td class="default-column">${customer.branch}</td>
-                                <td class="optional-column">${customer.discount_percentage}</td>
-                                <td class="optional-column">${customer.price}</td>
-                                <td class="optional-column">${customer.discounted_price}</td>
-                                <td class="optional-column">${customer.control_number}</td>
+                                 <td>${customer.ID}</td>
+                                <td>${customer.name}</td>
+                                <td>${customer.citizen}</td>
+                                <td>${customer.food}</td>
+                                <td>${customer.date}</td>
+                                <td>${customer.time}</td>
+                                <td>${customer.cashier}</td>
+                                <td>${customer.discounted_price}</td>
                             </tr>
                         `;
                         tableBody.innerHTML += row;
                     });
 
-                    // Apply column visibility to new rows
-                    const optionalCells = document.querySelectorAll('#customerTableBody tr td.optional-column');
-                    optionalCells.forEach(cell => {
-                        cell.style.display = toggleColumnsBtn.textContent === 'Show All' ? 'none' : '';
-                    });
+
                 } else {
                     tableBody.innerHTML = "<tr><td colspan='13'>No records found.</td></tr>";
                 }
@@ -231,12 +184,11 @@
                     customer.ID.toString().includes(searchValue) ||
                     customer.name.toLowerCase().includes(searchValue) ||
                     customer.citizen.toLowerCase().includes(searchValue) ||
-                    customer.city.toLowerCase().includes(searchValue) ||
                     customer.food.toLowerCase().includes(searchValue) ||
                     customer.date.toLowerCase().includes(searchValue) ||
                     customer.time.toLowerCase().includes(searchValue) ||
                     customer.cashier.toLowerCase().includes(searchValue) ||
-                    customer.discount_percentage.toString().includes(searchValue)
+                    customer.discounted_price.toString().includes(searchValue)
                 );
 
                 populateTable(filteredData);
