@@ -423,18 +423,14 @@
                 currentCustomers.forEach(customer => {
                     const row = `
             <tr>
-                <td>${customer.ID}</td>
-                <td>${customer.name}</td>
-                <td>${customer.citizen}</td>
-                <td>${customer.food}</td>
-                <td>${customer.date}</td>
-                <td>${customer.time}</td>
-                <td>${customer.cashier}</td>
-                <td>${customer.branch}</td>
-                <td>${customer.discount_percentage}</td>
-                <td>${customer.price}</td>
-                <td>${customer.discounted_price}</td>
-                <td>${customer.control_number}</td>
+                        <td>${customer.ID}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.citizen}</td>
+                        <td>${customer.food}</td>
+                        <td>${customer.date}</td>
+                        <td>${customer.time}</td>
+                        <td>${customer.cashier}</td>
+                        <td>${customer.discounted_price}</td>
             </tr>
             `;
                     tableBody.innerHTML += row;

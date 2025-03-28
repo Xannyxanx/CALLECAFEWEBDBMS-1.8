@@ -5,10 +5,10 @@ require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$servername = "sql309.infinityfree.com";
-$username = "if0_38512765";
-$password = "CalleCafe123";
-$dbname = "if0_38512765_callecafe";
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "callecafe";
 
 // Connect to the database
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -106,4 +106,3 @@ if ($result->num_rows === 1) {
 $stmt->close();
 $conn->close();
 ?>
-
